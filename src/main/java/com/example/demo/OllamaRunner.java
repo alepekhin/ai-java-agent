@@ -30,7 +30,7 @@ public class OllamaRunner implements CommandLineRunner {
         // Промпт можно сформировать по разному - читая файлы, базу данных, выполняя curl и т.д.
         String prompt = getPrompt();
         // выполняет промпт
-        String response = chatClient.prompt().user(getPrompt()).call().content();
+        String response = chatClient.prompt().user(prompt).call().content();
         // Обрабатываем результат выполнения. При необходимости можно продолжить диалог с LLM
         process(response);
     }
