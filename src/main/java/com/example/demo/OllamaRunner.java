@@ -6,48 +6,59 @@ import org.springframework.stereotype.Component;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
+import java.io.File;
+import lombok.extern.slf4j.Slf4j;
 
-/**
- * Компонента спринга для взаимодействия с LLM
- */
 @Component
+@Slf4j
 public class OllamaRunner implements CommandLineRunner {
 
     private final ChatClient chatClient;
+    private final FileProcessor fileProcessor;
 
     /**
-     * Конструктор инициализирующий LLM клиента
+     * Конструктор для инициализации зависимостей.
+     *
+     * @param chatClientBuilder бUILDER для создания экземпляра ChatClient
+     * @param fileProcessor процессор файлов
      */
-    public OllamaRunner(ChatClient.Builder chatClientBuilder) {
+    public OllamaRunner(ChatClient.Builder chatClientBuilder, FileProcessor fileProcessor) {
         this.chatClient = chatClientBuilder.build();
+        this.fileProcessor = fileProcessor;
     }
 
-    /**
-     * Метод интерфейса CommandLineRunner выполняющий всю работу
-     */
     @Override
     public void run(String[] args) throws Exception {
-        // Промпт можно сформировать по разному - читая файлы, базу данных, выполняя curl и т.д.
-        String prompt = getPrompt();
-        // выполняет промпт
-        String response = chatClient.prompt().user(prompt).call().content();
-        // Обрабатываем результат выполнения. При необходимости можно продолжить диалог с LLM
-        process(response);
+        if (args.length == 0) {
+            throw new IllegalArgumentException("No input files provided");
+        }
+        try {
+            String prompt = getPrompt(args);
+            log.info("Generated prompt: {}", prompt);
+            String response = chatClient.prompt().user(prompt).call().content();
+            process(response);
+        } catch (IOException e) {
+            log.error("Error processing prompt or files", e);
+        }
+    }
+
+    private String getPrompt(String[] args) throws IOException {
+        StringBuilder prompt = new StringBuilder();
+        for (String arg : args) {
+            fileProcessor.process(arg, prompt);
+        }
+        return prompt.toString();
     }
 
     /**
-     * Формирует промпт
-     */
-    private String getPrompt() throws IOException {
-        return Files.readString(Path.of("prompt.txt"));
-    }
-
-    /**
-     * Обрабатывает результат выполения промпта
+     * Обрабатывает полученный ответ и записывает его в файл.
+     *
+     * @param text текст ответа
+     * @throws IOException если произошла ошибка при записи файла
      */
     private void process(String text) throws IOException {
-        Files.writeString(Path.of("output.txt"), text);
+        fileProcessor.writeResponse(text);
+        log.info("Written to output.txt");
     }
-
 }
 
