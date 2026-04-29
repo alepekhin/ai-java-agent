@@ -15,6 +15,7 @@ public class OllamaRunner implements CommandLineRunner {
 
     private final ChatClient chatClient;
     private final FileProcessor fileProcessor;
+    private final String OUTPUT_FILE = "output.txt";
 
     /**
      * Конструктор для инициализации зависимостей.
@@ -34,7 +35,7 @@ public class OllamaRunner implements CommandLineRunner {
         }
         try {
             String prompt = getPrompt(args);
-            log.info("Generated prompt: {}", prompt);
+            log.info("Generated prompt: \n{}", prompt);
             String response = chatClient.prompt().user(prompt).call().content();
             process(response);
         } catch (IOException e) {
@@ -57,8 +58,8 @@ public class OllamaRunner implements CommandLineRunner {
      * @throws IOException если произошла ошибка при записи файла
      */
     private void process(String text) throws IOException {
-        fileProcessor.writeResponse(text);
-        log.info("Written to output.txt");
+        fileProcessor.writeResponse(text, OUTPUT_FILE);
+        log.info("Written to " + OUTPUT_FILE);
     }
 }
 

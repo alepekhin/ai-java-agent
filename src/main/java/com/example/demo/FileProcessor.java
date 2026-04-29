@@ -42,8 +42,8 @@ public class FileProcessor {
      * @param text текст ответа
      * @throws IOException если произошла ошибка при записи файла
      */
-    public void writeResponse(String text) throws IOException {
-        Path outputPath = Path.of("output.txt");
+    public void writeResponse(String text, String outputFile) throws IOException {
+        Path outputPath = Path.of(outputFile);
         Files.writeString(outputPath, text);
         log.info("Written to output.txt at {}", outputPath);
     }
