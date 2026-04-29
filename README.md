@@ -30,7 +30,7 @@ ollama run qwen2.5-coder:7b
 ```
 gradle build
 ```
-В результате будет исполняемый построен файл `build/libs/ai-java-agent-1.0.0.jar`
+В результате будет построен исполняемый файл `build/libs/ai-java-agent-1.0.0.jar`
 
 ## Использование
 
@@ -42,7 +42,9 @@ gradle build
 ```
 java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar prompt-review.txt src/main/java
 ```
-Должен появиться файл output.txt содержаший ревью кода данного проекта
+Здесь промпт строится из файла `prompt-review.txt` и всех файлов *.java в каталоге src/main/java
+
+В результате должен появиться файл output.txt содержаший ревью кода данного проекта
 
 
 
