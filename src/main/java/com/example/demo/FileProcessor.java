@@ -21,10 +21,12 @@ public class FileProcessor {
     public void process(String filePath, StringBuilder prompt) throws IOException {
         File file = new File(filePath);
         if (!file.exists()) {
-            log.error("File not found: {}", filePath);
-            throw new IOException("File not found: " + filePath);
+            // предполагаем что это уже промпт
+            prompt.append(filePath);
+            prompt.append(" ");
         }
         if (file.isFile() && (filePath.endsWith(".java") || filePath.endsWith(".txt"))) {
+            prompt.append("\n");
             prompt.append(Files.readString(Path.of(filePath))).append("\n");
             log.info("Read file: {}", filePath);
         } else if (file.isDirectory()) {
@@ -37,12 +39,12 @@ public class FileProcessor {
     }
 
     /**
-     * Записывает текст ответа в файл.
+     * Записывает текст в файл.
      *
      * @param text текст ответа
      * @throws IOException если произошла ошибка при записи файла
      */
-    public void writeResponse(String text, String outputFile) throws IOException {
+    public void writeToFile(String text, String outputFile) throws IOException {
         Path outputPath = Path.of(outputFile);
         Files.writeString(outputPath, text);
         log.info("Written to output.txt at {}", outputPath);

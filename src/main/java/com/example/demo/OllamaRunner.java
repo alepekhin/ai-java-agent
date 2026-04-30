@@ -29,13 +29,14 @@ public class OllamaRunner implements CommandLineRunner {
     }
 
     @Override
-    public void run(String[] args) throws Exception {
+    public void run(String[] args) {
         if (args.length == 0) {
-            throw new IllegalArgumentException("No input files provided");
+            throw new IllegalArgumentException("No arguments provided");
         }
         try {
             String prompt = getPrompt(args);
             log.info("Generated prompt: \n{}", prompt);
+            fileProcessor.writeToFile(prompt, "prompt.txt");
             String response = chatClient.prompt().user(prompt).call().content();
             process(response);
         } catch (IOException e) {
@@ -57,9 +58,8 @@ public class OllamaRunner implements CommandLineRunner {
      * @param text текст ответа
      * @throws IOException если произошла ошибка при записи файла
      */
-    private void process(String text) throws IOException {
-        fileProcessor.writeResponse(text, OUTPUT_FILE);
-        log.info("Written to " + OUTPUT_FILE);
+    private void process(String text) {
+        System.out.println(text);
     }
 }
 

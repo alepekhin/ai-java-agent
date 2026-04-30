@@ -34,19 +34,30 @@ gradle build
 
 ## Использование
 
-Приложение выполняет промпт составленный из одного или нескольких файлов.
+Приложение выполняет промпт составленный из аргументов командной строки или
+содежимого файлов, если аргумент файл.
 Среди указанных файлов могут быть каталоги, тогда включаются файлы из них.
 Включаются только файлы с расширениями `.java` и `.txt`
 
 Например, чтобы получить ревью кода, выполнить
 ```
-java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar prompt-review.txt src/main/java
+java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar Make review of project src/main/java
 ```
-Здесь промпт строится из файла `prompt-review.txt` и всех файлов *.java в каталоге src/main/java
+Здесь промпт строится из текста "Make review of prject" и всех файлов *.java, *.txt в каталоге src/main/java
 
-В результате должен появиться файл output.txt содержаший ревью кода данного проекта
+Результат выводится в stdout и может быть переназначен в файл. 
 
+Чтобы получить шутку, выполнить
+```
+java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar Расскажи шутку
+```
+или
+```
+./run.sh Расскажи шутку
+```
+## Note
 
+We need pom.xml for jls https://github.com/alepekhin/jls
 
 
 
