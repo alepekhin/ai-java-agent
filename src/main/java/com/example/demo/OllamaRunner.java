@@ -44,7 +44,7 @@ public class OllamaRunner implements CommandLineRunner {
                 System.out.println("Thinking...");
                 String response = chatClient.prompt().user(history.toString()).call().content();
                 history.append(response);
-                process(response);
+                process(response, args);
                 prompt = getPrompt();
             }
         } catch (IOException e) {
@@ -67,8 +67,12 @@ public class OllamaRunner implements CommandLineRunner {
      * @param text текст ответа
      * @throws IOException если произошла ошибка при записи файла
      */
-    private void process(String text) {
-        System.out.println(text);
+    private void process(String text, String[] args) throws IOException {
+        if (args.length == 0) {
+            System.out.println(text);
+        } else {
+            fileProcessor.writeToFile(text, args[0]);
+        }
     }
 }
 
