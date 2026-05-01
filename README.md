@@ -71,7 +71,3 @@ Enter prompt>
 ```
 Ответ записывается в файл, занный аргументом.
 
-## Note
-
-pom.xml нужен для jls https://github.com/alepekhin/jls ктотрый пока не работает с gradle
-
