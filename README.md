@@ -38,10 +38,14 @@ gradle build
 содежимого файлов, если аргумент файл.
 Среди указанных файлов могут быть каталоги, тогда включаются файлы из них.
 Включаются только файлы с расширениями `.java` и `.txt`
+Промпт и ответ сохраняются в истории и история включается в следующий промпт
+поскольку ollama является stateless
+
 
 Например, чтобы получить ревью кода, выполнить
 ```
-java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar Make review of project src/main/java
+java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar 
+prompt> Make review of project src/main/java
 ```
 Здесь промпт строится из текста "Make review of prject" и всех файлов *.java, *.txt в каталоге src/main/java
 
@@ -49,11 +53,13 @@ java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar 
 
 Чтобы получить шутку, выполнить
 ```
-java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar Расскажи шутку
+java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar 
+prompt> Расскажи шутку
 ```
 или
 ```
-./run.sh Расскажи шутку
+./run.sh 
+prompt> Расскажи шутку
 ```
 ## Note
 
