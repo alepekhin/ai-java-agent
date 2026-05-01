@@ -61,17 +61,17 @@ prompt> Расскажи шутку
 ./run.sh 
 prompt> Расскажи шутку
 ```
+
+Пример использования для написания теста
+```
+$ rlwrap ./run.sh src/test/java/com/example/demo/FileProcessorTest.java
+Enter prompt> написать junit тесты для класса src/main/java/com/example/demo/FileProcessor.java
+Thinking...
+Enter prompt> 
+```
+Ответ записывается в файл, занный аргументом.
+
 ## Note
 
-We need pom.xml for jls https://github.com/alepekhin/jls
-
-
-
-
-
-
-
-
-
-
+pom.xml нужен для jls https://github.com/alepekhin/jls ктотрый пока не работает с gradle
 
