@@ -15,8 +15,7 @@ public class OllamaRunner implements CommandLineRunner {
 
     private final ChatClient chatClient;
     private final FileProcessor fileProcessor;
-    private final String OUTPUT_FILE = "output.txt";
-    private final StringBuilder history = new StringBuilder();
+    private StringBuilder history = new StringBuilder();
 
     /**
      * Конструктор для инициализации зависимостей.
@@ -29,22 +28,29 @@ public class OllamaRunner implements CommandLineRunner {
         this.fileProcessor = fileProcessor;
     }
 
-//Ollama models are "stateless" by default, meaning they forget everything the moment a conversation ends. 
-//To enable the ability to recall past interactions, you must implement a "memory" layer 
-//that sends previous chat history back to the model with each new query.
-    
+    //Ollama models are "stateless" by default, meaning they forget everything the moment a conversation ends. 
+    //To enable the ability to recall past interactions, you must implement a "memory" layer 
+    //that sends previous chat history back to the model with each new query.
+
     @Override
     public void run(String[] args) {
         try {
             String prompt = getPrompt();
-            while (prompt.length() != 0) {
-                log.info("Generated prompt: \n{}", prompt);
-                history.append(prompt);
-                fileProcessor.writeToFile(prompt, "prompt.txt");
-                System.out.println("Thinking...");
-                String response = chatClient.prompt().user(history.toString()).call().content();
-                history.append(response);
-                process(response, args);
+            while (true) {
+                if ("quit".equals(prompt.trim()) || "exit".equals(prompt.trim())) {
+                    break;
+                } else if ("clear".equals(prompt.trim())) {
+                    history = new StringBuilder();
+                    System.out.println("...history cleared");
+                } else {
+                    log.info("Generated prompt: \n{}", prompt);
+                    history.append(prompt);
+                    fileProcessor.writeToFile(prompt, "prompt.txt");
+                    System.out.println("Thinking...");
+                    String response = chatClient.prompt().user(history.toString()).call().content();
+                    history.append(response);
+                    process(response, args);
+                }
                 prompt = getPrompt();
             }
         } catch (IOException e) {
