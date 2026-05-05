@@ -19,20 +19,26 @@ public class FileProcessor {
      * @throws IOException если произошла ошибка при чтении файла
      */
     public void process(String filePath, StringBuilder prompt) throws IOException {
-        File file = new File(filePath);
-        if (!file.exists()) {
+        Path path = Path.of(filePath);
+        if (!Files.exists(path)) {
             // предполагаем что это уже промпт
             prompt.append(filePath);
             prompt.append(" ");
         }
-        if (file.isFile() && (filePath.endsWith(".java") || filePath.endsWith(".txt"))) {
+        if (Files.isRegularFile(path) && (filePath.endsWith(".java") || filePath.endsWith(".txt"))) {
             prompt.append("\n");
             prompt.append(Files.readString(Path.of(filePath))).append("\n");
             log.info("Read file: {}", filePath);
-        } else if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                process(child.getAbsolutePath(), prompt);
-            }
+        } else if (Files.isDirectory(path)) {
+            Files.walk(path)
+                 .filter(Files::isRegularFile)
+                 .forEach(child -> {
+                     try {
+                         process(child.toString(), prompt);
+                     } catch (IOException e) {
+                         log.error("Error processing file: {}", child, e);
+                     }
+                 });
         } else {
             log.warn("Skipping non-file or non-supported file type: {}", filePath);
         }
@@ -46,7 +52,9 @@ public class FileProcessor {
      */
     public void writeToFile(String text, String outputFile) throws IOException {
         Path outputPath = Path.of(outputFile);
-        Files.writeString(outputPath, text);
+        try (var writer = Files.newBufferedWriter(outputPath)) {
+            writer.write(text);
+        }
         log.info("Written to output.txt at {}", outputPath);
     }
 }

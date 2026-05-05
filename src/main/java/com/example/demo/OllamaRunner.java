@@ -3,10 +3,7 @@ package com.example.demo;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.io.IOException;
-import java.io.File;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
