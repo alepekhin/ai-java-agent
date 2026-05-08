@@ -1,14 +1,12 @@
 package com.example.demo;
 
 import org.springframework.stereotype.Component;
-import lombok.extern.slf4j.Slf4j;
 import java.nio.file.Files;
 import java.io.IOException;
 import java.io.File;
 import java.nio.file.Path;
 
 @Component
-@Slf4j
 public class FileProcessor {
 
     /**
@@ -25,10 +23,10 @@ public class FileProcessor {
             prompt.append(filePath);
             prompt.append(" ");
         }
-        if (Files.isRegularFile(path) && (filePath.endsWith(".java") || filePath.endsWith(".txt"))) {
+        if (Files.isRegularFile(path) && (filePath.endsWith(".java") || filePath.endsWith(".md"))) {
             prompt.append("\n");
             prompt.append(Files.readString(Path.of(filePath))).append("\n");
-            log.info("Read file: {}", filePath);
+            System.out.println("...added to context " + path);
         } else if (Files.isDirectory(path)) {
             Files.walk(path)
                  .filter(Files::isRegularFile)
@@ -36,11 +34,11 @@ public class FileProcessor {
                      try {
                          process(child.toString(), prompt);
                      } catch (IOException e) {
-                         log.error("Error processing file: {}", child, e);
+                         System.err.println("Error processing file: " + child + "\n" + e);
                      }
                  });
         } else {
-            log.warn("Skipping non-file or non-supported file type: {}", filePath);
+            System.out.println("Skipping non-file or non-supported file type: " + filePath);
         }
     }
 
@@ -55,7 +53,6 @@ public class FileProcessor {
         try (var writer = Files.newBufferedWriter(outputPath)) {
             writer.write(text);
         }
-        log.info("Written to output.txt at {}", outputPath);
     }
 }
 

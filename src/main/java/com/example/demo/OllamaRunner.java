@@ -4,10 +4,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Slf4j
 public class OllamaRunner implements CommandLineRunner {
 
     private final ChatClient chatClient;
@@ -30,38 +28,39 @@ public class OllamaRunner implements CommandLineRunner {
     //that sends previous chat history back to the model with each new query.
 
     @Override
-    public void run(String[] args) {
-        try {
-            String prompt = getPrompt();
+    public void run(String[] args) throws IOException {
             while (true) {
-                if ("quit".equals(prompt.trim()) || "exit".equals(prompt.trim())) {
-                    break;
-                } else if ("clear".equals(prompt.trim())) {
-                    history = new StringBuilder();
-                    System.out.println("...history cleared");
-                } else {
-                    log.info("Generated prompt: \n{}", prompt);
-                    history.append(prompt);
-                    fileProcessor.writeToFile(prompt, "prompt.txt");
-                    System.out.println("Thinking...");
-                    String response = chatClient.prompt().user(history.toString()).call().content();
-                    history.append(response);
-                    process(response, args);
-                }
-                prompt = getPrompt();
+                processResponse(processPrompt(getPrompt()), args);
             }
-        } catch (IOException e) {
-            log.error("Error processing prompt or files", e);
-        }
+    }
+
+    private String processPrompt(String prompt) throws IOException {
+        if (prompt.contains("/clear")) {
+            System.out.printf(("... history cleared"));
+            history = new StringBuilder();
+        } 
+        history.append(prompt);
+        fileProcessor.writeToFile(history.toString(), "prompt.txt");
+        System.out.println("Thinking...");
+        String response = chatClient.prompt().user(history.toString()).call().content();
+        history.append(response);
+        return response;
     }
 
     private String getPrompt() throws IOException {
         String line = System.console().readLine("Enter prompt> ");
-        StringBuilder prompt = new StringBuilder();
-        for (String arg : line.split(" ")) {
-            fileProcessor.process(arg, prompt);
+        if (line != null && !line.isBlank()) {
+            StringBuilder prompt = new StringBuilder();
+            for (String arg : line.split(" ")) {
+                if (!arg.isBlank()) {
+                    fileProcessor.process(arg, prompt);
+                }
+            }
+            return prompt.toString();
         }
-        return prompt.toString();
+        System.exit(0);
+        return "";
+        
     }
 
     /**
@@ -70,7 +69,7 @@ public class OllamaRunner implements CommandLineRunner {
      * @param text текст ответа
      * @throws IOException если произошла ошибка при записи файла
      */
-    private void process(String text, String[] args) throws IOException {
+    private void processResponse(String text, String[] args) throws IOException {
         if (args.length == 0) {
             System.out.println(text);
         } else {

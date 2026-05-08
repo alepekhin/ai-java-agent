@@ -37,7 +37,7 @@ public class FileProcessorTest {
     @Test
     void testProcessTxtFile(@TempDir Path tempDir) throws IOException {
         String txtContent = "Hello, World!";
-        Path txtFilePath = tempDir.resolve("test.txt");
+        Path txtFilePath = tempDir.resolve("test.md");
         Files.writeString(txtFilePath, txtContent);
 
         StringBuilder prompt = new StringBuilder();
