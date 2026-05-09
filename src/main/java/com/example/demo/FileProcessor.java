@@ -19,26 +19,23 @@ public class FileProcessor {
     public void process(String filePath, StringBuilder prompt) throws IOException {
         Path path = Path.of(filePath);
         if (!Files.exists(path)) {
-            // предполагаем что это уже промпт
+            // предполагаем что это обычное слово
             prompt.append(filePath);
             prompt.append(" ");
-        }
-        if (Files.isRegularFile(path) && (filePath.endsWith(".java") || filePath.endsWith(".md"))) {
+        } else if (Files.isRegularFile(path) && (filePath.endsWith(".java") || filePath.endsWith(".md"))) {
             prompt.append("\n");
             prompt.append(Files.readString(Path.of(filePath))).append("\n");
             System.out.println("...added to context " + path);
         } else if (Files.isDirectory(path)) {
             Files.walk(path)
-                 .filter(Files::isRegularFile)
-                 .forEach(child -> {
-                     try {
-                         process(child.toString(), prompt);
-                     } catch (IOException e) {
-                         System.err.println("Error processing file: " + child + "\n" + e);
-                     }
-                 });
-        } else {
-            System.out.println("Skipping non-file or non-supported file type: " + filePath);
+                .filter(Files::isRegularFile)
+                .forEach(child -> {
+                    try {
+                        process(child.toString(), prompt);
+                    } catch (IOException e) {
+                        System.err.println("Error processing file: " + child + "\n" + e);
+                    }
+                });
         }
     }
 
