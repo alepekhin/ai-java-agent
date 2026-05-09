@@ -38,8 +38,6 @@ ollama run qwen2.5-coder:7b
 Промпт и ответ сохраняются в истории и история включается в следующий промпт
 поскольку ollama является stateless
 
-
-Например, чтобы получить ревью кода, выполнить
 ```
 java --enable-native-access=ALL-UNNAMED -jar target/ai-java-agent-1.0.0.jar 
 Enter prompt>
