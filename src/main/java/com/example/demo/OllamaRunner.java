@@ -34,7 +34,7 @@ public class OllamaRunner implements CommandLineRunner {
             }
     }
 
-    private String processPrompt(String prompt) throws IOException {
+    protected String processPrompt(String prompt) throws IOException {
         history.append(prompt);
         fileProcessor.writeToFile(history.toString(), "prompt.txt");
         System.out.println("Thinking...");
@@ -65,7 +65,7 @@ public class OllamaRunner implements CommandLineRunner {
      * @param text текст ответа
      * @throws IOException если произошла ошибка при записи файла
      */
-    private void processResponse(String text, String[] args) throws IOException {
+    protected void processResponse(String text, String[] args) throws IOException {
         if (args.length == 0) {
             System.out.println(text);
         } else {
