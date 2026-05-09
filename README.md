@@ -8,7 +8,6 @@ Simple AI agent on Spring AI
 На компьютере должно быть установлено
 
 - Java 25
-- gradle 9
 - ollama 0.21.2
 - LLM qwen2.5-coder:7b
 
@@ -17,8 +16,6 @@ Simple AI agent on Spring AI
 ```
 java -version
   java version "25.0.3" 2026-04-21 LTS
-gradle -version
-  Gradle 9.2.0
 ollama -v
   ollama version is 0.21.2
 ollama run qwen2.5-coder:7b
@@ -28,46 +25,50 @@ ollama run qwen2.5-coder:7b
 ## Построить приложение
 
 ```
-gradle build
+./mvnw clean package
 ```
-В результате будет построен исполняемый файл `build/libs/ai-java-agent-1.0.0.jar`
+В результате будет построен файл `target/ai-java-agent-1.0.0.jar`
 
 ## Использование
 
 Приложение выполняет промпт составленный из аргументов командной строки или
 содежимого файлов, если аргумент файл.
 Среди указанных файлов могут быть каталоги, тогда включаются файлы из них.
-Включаются только файлы с расширениями `.java` и `.txt`
+Включаются только файлы с расширениями `.java` и `.md`
 Промпт и ответ сохраняются в истории и история включается в следующий промпт
 поскольку ollama является stateless
 
 
 Например, чтобы получить ревью кода, выполнить
 ```
-java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar 
-prompt> Make review of project src/main/java
+java --enable-native-access=ALL-UNNAMED -jar target/ai-java-agent-1.0.0.jar 
+Enter prompt>
 ```
-Здесь промпт строится из текста "Make review of prject" и всех файлов *.java, *.txt в каталоге src/main/java
+
+Например, чтобы получить ревью проекта, задать промпт "Make review of prоject src/main/java"
+В результате в промпт будут добавлены все файл *.java в каталоге src/main/java и ниже.
 
 Результат выводится в stdout и может быть переназначен в файл. 
 
 Чтобы получить шутку, выполнить
 ```
-java --enable-native-access=ALL-UNNAMED -jar build/libs/ai-java-agent-1.0.0.jar 
-prompt> Расскажи шутку
+java --enable-native-access=ALL-UNNAMED -jar target/ai-java-agent-1.0.0.jar 
+Enter prompt> Расскажи шутку
 ```
 или
 ```
 ./run.sh 
-prompt> Расскажи шутку
+Enter prompt> Расскажи шутку
 ```
 
 Пример использования для написания теста
 ```
 $ rlwrap ./run.sh src/test/java/com/example/demo/FileProcessorTest.java
 Enter prompt> написать junit тесты для класса src/main/java/com/example/demo/FileProcessor.java
-Thinking...
+Thinking...`
 Enter prompt> 
 ```
-Ответ записывается в файл, занный аргументом.
+Ответ записывается в файл 'src/test/java/com/example/demo/FileProcessorTest.java', занный аргументом.
+
+
 

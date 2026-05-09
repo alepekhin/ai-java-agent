@@ -35,10 +35,6 @@ public class OllamaRunner implements CommandLineRunner {
     }
 
     private String processPrompt(String prompt) throws IOException {
-        if (prompt.contains("/clear")) {
-            System.out.printf(("... history cleared"));
-            history = new StringBuilder();
-        } 
         history.append(prompt);
         fileProcessor.writeToFile(history.toString(), "prompt.txt");
         System.out.println("Thinking...");
