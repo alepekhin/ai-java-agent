@@ -66,7 +66,5 @@ Enter prompt> написать junit тесты для класса src/main/jav
 Thinking...`
 Enter prompt> 
 ```
-Ответ записывается в файл `src/test/java/com/example/demo/FileProcessorTest.java`, занный аргументом.
-
-
+Ответ записывается в файл `src/test/java/com/example/demo/FileProcessorTest.java`, заданный аргументом
 
