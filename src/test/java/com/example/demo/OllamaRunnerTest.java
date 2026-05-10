@@ -1,71 +1,102 @@
 package com.example.demo;
 
-import org.springframework.ai.chat.client.ChatClient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.springframework.ai.chat.client.ChatClient;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 class OllamaRunnerTest {
 
+    private final PrintStream originalOut = System.out;
+
     private ChatClient chatClient;
-    private ChatClient.Builder chatClientBuilder;
+    private ChatClient.ChatClientRequestSpec requestSpec;
+    private ChatClient.CallResponseSpec callResponseSpec;
     private FileProcessor fileProcessor;
     private OllamaRunner ollamaRunner;
 
     @BeforeEach
     void setUp() {
+        ChatClient.Builder chatClientBuilder = mock(ChatClient.Builder.class);
         chatClient = mock(ChatClient.class);
-        chatClientBuilder = mock(ChatClient.Builder.class);
-        when(chatClientBuilder.build()).thenReturn(chatClient);
-
+        requestSpec = mock(ChatClient.ChatClientRequestSpec.class);
+        callResponseSpec = mock(ChatClient.CallResponseSpec.class);
         fileProcessor = mock(FileProcessor.class);
+
+        when(chatClientBuilder.build()).thenReturn(chatClient);
+        when(chatClient.prompt()).thenReturn(requestSpec);
+        when(requestSpec.user(anyString())).thenReturn(requestSpec);
+        when(requestSpec.call()).thenReturn(callResponseSpec);
 
         ollamaRunner = new OllamaRunner(chatClientBuilder, fileProcessor);
     }
 
-    @Test
-    void testGetPrompt_ReturnsProcessedInput() throws IOException {
-        // Mock System.console().readLine() to return a specific string
-        // Since System.console() can't be mocked directly, we can simulate by temporarily replacing System.console()
-        // Alternatively, modify the class to inject a ConsoleReader for testing.
-        // For simplicity, assume getPrompt() is tested separately or refactored for testability.
-
-        // For demonstration purpose, this test may be skipped or refactored.
+    @AfterEach
+    void tearDown() {
+        System.setOut(originalOut);
     }
 
     @Test
-    void testProcessResponse_WithNoArgs_ShouldPrintResponse() throws IOException {
-        // Since System.out.println is used, we can redirect System.out to capture output
-        String responseText = "Response text";
+    void processPromptWritesPromptHistoryAndReturnsChatResponse() throws IOException {
+        when(callResponseSpec.content()).thenReturn("model response");
 
-        // Capture System.out
-        var outputStream = new java.io.ByteArrayOutputStream();
-        System.setOut(new java.io.PrintStream(outputStream));
+        String response = ollamaRunner.processPrompt("first prompt");
 
-        // Call method
-        ollamaRunner
-            .processResponse(responseText, new String[]{});
+        assertEquals("model response", response);
+        verify(fileProcessor).writeToFile("first prompt", "prompt.txt");
+        verify(requestSpec).user("first prompt");
 
-        // Assert
-        String output = outputStream.toString().trim();
-        assertEquals(responseText, output);
+        var orderedCalls = inOrder(fileProcessor, chatClient, requestSpec, callResponseSpec);
+        orderedCalls.verify(fileProcessor).writeToFile("first prompt", "prompt.txt");
+        orderedCalls.verify(chatClient).prompt();
+        orderedCalls.verify(requestSpec).user("first prompt");
+        orderedCalls.verify(requestSpec).call();
+        orderedCalls.verify(callResponseSpec).content();
     }
 
     @Test
-    void testProcessResponse_WithArgs_ShouldWriteToFile() throws IOException {
-        String responseText = "Response to file";
+    void processPromptIncludesPreviousConversationInNextPrompt() throws IOException {
+        when(callResponseSpec.content()).thenReturn("first response", "second response");
 
-        // Call method with args
-        String filename = "testfile.txt";
-        ollamaRunner.processResponse(responseText, new String[]{filename});
+        ollamaRunner.processPrompt("first prompt");
+        ollamaRunner.processPrompt("second prompt");
 
-        // Verify writeToFile called
-        verify(fileProcessor).writeToFile(responseText, filename);
+        ArgumentCaptor<String> userPrompt = ArgumentCaptor.forClass(String.class);
+        verify(requestSpec, org.mockito.Mockito.times(2)).user(userPrompt.capture());
+
+        assertEquals("first prompt", userPrompt.getAllValues().get(0));
+        assertEquals("first promptfirst responsesecond prompt", userPrompt.getAllValues().get(1));
+        verify(fileProcessor).writeToFile("first promptfirst responsesecond prompt", "prompt.txt");
+    }
+
+    @Test
+    void processResponseWithNoArgsPrintsResponse() throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+
+        ollamaRunner.processResponse("Response text", new String[] {});
+
+        assertEquals("Response text" + System.lineSeparator(), outputStream.toString());
+        verifyNoInteractions(fileProcessor);
+    }
+
+    @Test
+    void processResponseWithArgsWritesResponseToFirstArgFile() throws IOException {
+        ollamaRunner.processResponse("Response to file", new String[] {"testfile.txt", "ignored.txt"});
+
+        verify(fileProcessor).writeToFile("Response to file", "testfile.txt");
     }
 }
