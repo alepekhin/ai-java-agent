@@ -11,17 +11,24 @@ public class OllamaRunner implements CommandLineRunner {
     private final ChatClient chatClient;
     private final FileProcessor fileProcessor;
     private StringBuilder history = new StringBuilder();
+    private final InputReader inputReader; // Add this field
+
+
 
     /**
      * Конструктор для инициализации зависимостей.
      *
      * @param chatClientBuilder бUILDER для создания экземпляра ChatClient
      * @param fileProcessor процессор файлов
+     * @param inputReader   читатель ввода
      */
-    public OllamaRunner(ChatClient.Builder chatClientBuilder, FileProcessor fileProcessor) {
+    public OllamaRunner(ChatClient.Builder chatClientBuilder, FileProcessor fileProcessor, InputReader inputReader) {
         this.chatClient = chatClientBuilder.build();
         this.fileProcessor = fileProcessor;
+        this.inputReader = inputReader;
+        System.out.println(">>>>>>>>>> "+inputReader.getClass().getName());
     }
+
 
     //Ollama models are "stateless" by default, meaning they forget everything the moment a conversation ends. 
     //To enable the ability to recall past interactions, you must implement a "memory" layer 
@@ -30,7 +37,10 @@ public class OllamaRunner implements CommandLineRunner {
     @Override
     public void run(String[] args) throws IOException {
             while (true) {
-                processResponse(processPrompt(getPrompt()), args);
+                String prompt = getPrompt();
+                System.out.println(">>>>>>>>>>>>> prompt:"+prompt+":");
+                if (prompt.isBlank()) break;
+                processResponse(processPrompt(prompt), args);
             }
     }
 
@@ -44,7 +54,8 @@ public class OllamaRunner implements CommandLineRunner {
     }
 
     private String getPrompt() throws IOException {
-        String line = System.console().readLine("Enter prompt> ");
+        String line = inputReader.readLine("Enter prompt> "); // Use the injected input reader
+        System.out.println(">>>>>>> line "+line);
         if (line != null && !line.isBlank()) {
             StringBuilder prompt = new StringBuilder();
             for (String arg : line.split(" ")) {
@@ -54,7 +65,6 @@ public class OllamaRunner implements CommandLineRunner {
             }
             return prompt.toString();
         }
-        System.exit(0);
         return "";
         
     }
