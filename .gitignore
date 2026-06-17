@@ -1,3 +1,24 @@
 .git/
-target/
+
+# Build
+/target/
+
+# Application runtime output
+/prompt.txt
+*.log
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.project
+.settings/
+
+# Test resources (if used)
+src/test/resources/
+
+# OS files
+.DS_Store
+Thumbs.db
 

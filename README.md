@@ -9,7 +9,10 @@ Simple AI agent on Spring AI
 
 - Java 25
 - ollama 0.21.2
-- LLM qwen2.5-coder:7b
+- установлена модель, заданная в переменной окружения
+```
+export OLLAMA_MODEL=carstenuhlig/omnicoder-2-9b:q4_k_m
+```
 
 Проверить версии
 
@@ -18,9 +21,6 @@ java -version
   java version "25.0.3" 2026-04-21 LTS
 ollama -v
   ollama version is 0.21.2
-ollama run qwen2.5-coder:7b
-  >>> Send a message (/? for help)
-  Ctrl/D to exit
 ```
 ## Построить приложение
 
