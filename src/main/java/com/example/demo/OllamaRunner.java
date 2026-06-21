@@ -4,7 +4,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 @Component
 public class OllamaRunner implements CommandLineRunner {
@@ -12,8 +11,7 @@ public class OllamaRunner implements CommandLineRunner {
     private final ChatClient chatClient;
     private final FileProcessor fileProcessor;
     private final InputReader inputReader;
-    private final StringBuilder history = new StringBuilder();
-    private static final int MAX_HISTORY_TOKENS = 64000;
+    private final History history = new History();
 
     /**
      * Constructor for dependency initialization.
@@ -26,19 +24,6 @@ public class OllamaRunner implements CommandLineRunner {
         this.chatClient = chatClientBuilder.build();
         this.fileProcessor = fileProcessor;
         this.inputReader = inputReader;
-        history.setLength(0);
-    }
-
-    /**
-     * Ensures history stays within limits.
-     */
-    private void ensureHistoryLimit() {
-        String[] words = history.toString().split("\\s+");
-        System.out.println("context length " + words.length);
-        if (words.length > MAX_HISTORY_TOKENS) {
-            history.setLength(0);
-            System.out.println("context truncated");
-        }
     }
 
     /**
@@ -49,17 +34,17 @@ public class OllamaRunner implements CommandLineRunner {
     public void run(String[] args) throws IOException {
         while (true) {
             String prompt = getPrompt();
-            if (prompt.isBlank()) break;
+            if (prompt == null || prompt.isBlank()) break;
             processResponse(processPrompt(prompt), args);
+            System.out.println("Tokens used " + history.tokens());
         }
     }
 
-    protected String processPrompt(String prompt) throws IOException {
-        history.append(prompt);
+    private String processPrompt(String prompt) {
+        history.add(prompt); 
         System.out.println("Thinking...");
-        String response = chatClient.prompt().user(history.toString()).call().content();
-        ensureHistoryLimit();
-        history.append(response);
+        String response = chatClient.prompt().user(history.get()).call().content();
+        history.add(response);
         return response;
     }
 
@@ -84,7 +69,7 @@ public class OllamaRunner implements CommandLineRunner {
      * @param args output file path if provided
      * @throws IOException if error occurs
      */
-    protected void processResponse(String text, String[] args) throws IOException {
+    private void processResponse(String text, String[] args) throws IOException {
         if (args.length == 0) {
             System.out.println(text);
         } else {
