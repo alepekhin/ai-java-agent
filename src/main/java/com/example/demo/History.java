@@ -20,7 +20,7 @@ public class History {
     public int tokens() {
         String[] words = history.toString().trim().split("\\s+");
         // rough number of tokens, see https://docs.spring.io/spring-ai/reference/api/prompt.html
-        return words.length * 3 / 4;
+        return words.length * 4 / 3;
     }
 
 }
